@@ -13,6 +13,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -30,11 +32,13 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody Usuario usuario) {
         try {
             usuarioService.registrarUsuario(usuario);
-            return ResponseEntity.ok("Usuario registrado con éxito");
+            // Retornamos un JSON simple con mensaje
+            return ResponseEntity.ok(Map.of("mensaje", "Usuario registrado con éxito"));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {

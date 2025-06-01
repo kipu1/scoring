@@ -14,7 +14,8 @@ public class FotoService {
     @Autowired private FotoRepository fotoRepository;
 
     public void guardarFoto(String email, byte[] data) {
-        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow();
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
 
         Foto foto = new Foto();
         foto.setUsuario(usuario);
@@ -22,4 +23,5 @@ public class FotoService {
 
         fotoRepository.save(foto);
     }
+
 }

@@ -1,12 +1,15 @@
 package com.scoring.scoring.controller;
 
 import com.scoring.scoring.DTO.DatosPersonalesDTO;
+import com.scoring.scoring.DTO.ScoringDTO;
 import com.scoring.scoring.model.Scoring;
 import com.scoring.scoring.service.ScoringService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/scoring")
@@ -16,15 +19,20 @@ public class ScoringController {
 
     @PostMapping("/datos")
     public ResponseEntity<?> guardarDatos(@RequestBody DatosPersonalesDTO dto, Authentication auth) {
-        String email = auth.getName(); // viene del token JWT
+        System.out.println("Llega petición guardarDatos con dto: " + dto.getEdad() + ", " + dto.getIngreso());
+        String email = auth.getName();
         scoringService.guardarDatos(email, dto);
-        return ResponseEntity.ok("Datos personales guardados");
+        // Retornamos un JSON con mensaje
+        return ResponseEntity.ok(Map.of("mensaje", "Foto guardada"));
+
     }
 
+
     @GetMapping
-    public ResponseEntity<Scoring> obtenerScoring(Authentication auth) {
+    public ResponseEntity<ScoringDTO> obtenerScoring(Authentication auth) {
         String email = auth.getName();
-        Scoring score = scoringService.obtenerScoring(email);
-        return ResponseEntity.ok(score);
+        Scoring scoring = scoringService.obtenerScoring(email);
+        ScoringDTO dto = new ScoringDTO(scoring.getEdad(), scoring.getIngreso(), scoring.getScore());
+        return ResponseEntity.ok(dto);
     }
 }

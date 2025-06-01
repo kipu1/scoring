@@ -1,26 +1,16 @@
 package com.scoring.scoring.DTO;
 
-
-
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Positive;
-
-public class DatosPersonalesDTO {
-
-    @Min(value = 1, message = "La edad debe ser mayor o igual a 1")
+public class ScoringDTO {
     private int edad;
-
-    @Positive(message = "El ingreso debe ser un número positivo")
     private double ingreso;
+    private int score;
 
-    public DatosPersonalesDTO() {}
-
-    public DatosPersonalesDTO(int edad, double ingreso) {
+    public ScoringDTO(int edad, double ingreso, int score) {
         this.edad = edad;
         this.ingreso = ingreso;
+        this.score = score;
     }
 
-    // Getters y setters
     public int getEdad() {
         return edad;
     }
@@ -35,5 +25,13 @@ public class DatosPersonalesDTO {
 
     public void setIngreso(double ingreso) {
         this.ingreso = ingreso;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 }

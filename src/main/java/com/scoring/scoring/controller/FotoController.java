@@ -23,7 +23,12 @@ public class FotoController {
         String email = auth.getName();
         byte[] data = archivo.getBytes();
 
-        fotoService.guardarFoto(email, data);
-        return ResponseEntity.ok("Foto guardada");
+        try {
+            fotoService.guardarFoto(email, data);
+            return ResponseEntity.ok("Foto guardada");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al guardar foto: " + e.getMessage());
+        }
     }
+
 }

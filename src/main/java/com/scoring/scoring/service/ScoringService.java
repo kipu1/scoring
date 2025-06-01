@@ -10,20 +10,25 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ScoringService {
+
     @Autowired
     private UsuarioRepository usuarioRepository;
-    @Autowired private ScoringRepository scoringRepository;
+
+    @Autowired
+    private ScoringRepository scoringRepository;
 
     public int calcularScore(int edad, double ingreso) {
         int score = (int) (edad * 2 + ingreso / 100);
         return Math.min(score, 100);
     }
 
-
     public void guardarDatos(String email, DatosPersonalesDTO datos) {
-        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow();
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
 
-        Scoring scoring = new Scoring();
+        Scoring scoring = scoringRepository.findByUsuario(usuario).orElse(new Scoring());
+        // Si no existe scoring, crea uno nuevo, si existe, actualiza
+
         scoring.setEdad(datos.getEdad());
         scoring.setIngreso(datos.getIngreso());
         scoring.setScore(calcularScore(datos.getEdad(), datos.getIngreso()));
@@ -33,7 +38,10 @@ public class ScoringService {
     }
 
     public Scoring obtenerScoring(String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow();
-        return scoringRepository.findByUsuario(usuario).orElseThrow();
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+
+        return scoringRepository.findByUsuario(usuario)
+                .orElseThrow(() -> new RuntimeException("No existe scoring para el usuario con email: " + email));
     }
 }
