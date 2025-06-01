@@ -39,18 +39,25 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
         try {
-            // Autenticación con email y contraseña
-            authManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    authRequest.getEmail(), authRequest.getPassword()));
+            // Se autentica con email y password
+            var authentication = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authRequest.getEmail(),
+                            authRequest.getPassword()
+                    )
+            );
 
-            // Generar token JWT
-            String token = jwtUtil.generateToken(authRequest.getEmail());
+            // El username que se usa para el token suele venir del principal
+            String username = authentication.getName();
+
+            String token = jwtUtil.generateToken(username);
+
             return ResponseEntity.ok(new AuthResponse(token));
-
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno");
+            e.printStackTrace();  // Agrega para ver el stack trace en consola y entender el error real
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: " + e.getMessage());
         }
     }
 }
