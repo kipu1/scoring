@@ -24,14 +24,29 @@ public class UsuarioService {
      * Registra un nuevo usuario en la base de datos.
      */
     public void registrarUsuario(Usuario usuario) {
-        // Validar si el email ya está registrado
         if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
-            throw new RuntimeException("El email ya está registrado");
+            throw new RuntimeException("El correo ya está siendo utilizado");
         }
 
-        // Encriptar contraseña
+
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         usuarioRepository.save(usuario);
+    }
+
+    public String editarPerfil(String emailActual, String nuevoEmail, String nuevoNombre) {
+        Usuario usuario = usuarioRepository.findByEmail(emailActual)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // Si cambia el correo, verificar que no esté repetido
+        if (!emailActual.equals(nuevoEmail) && usuarioRepository.findByEmail(nuevoEmail).isPresent()) {
+            throw new RuntimeException("El nuevo email ya está en uso");
+        }
+
+        usuario.setEmail(nuevoEmail);
+        usuario.setNombre(nuevoNombre);
+
+        usuarioRepository.save(usuario);
+        return nuevoEmail; // lo usamos para emitir un nuevo token
     }
 
     /**
@@ -41,21 +56,20 @@ public class UsuarioService {
         return usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
     }
-    public void editarDatos(String email, DatosPersonalesDTO dto) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
+    public void editarUsuario(String emailActual, String nuevoNombre, String nuevoEmail) {
+        Usuario usuario = usuarioRepository.findByEmail(emailActual)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        Scoring scoring = scoringRepository.findByUsuario(usuario)
-                .orElseThrow(() -> new RuntimeException("No se encontró scoring para el usuario"));
+        // Validar que el nuevo email no esté en uso por otro usuario
+        if (!nuevoEmail.equals(emailActual) && usuarioRepository.findByEmail(nuevoEmail).isPresent()) {
+            throw new RuntimeException("El nuevo email ya está registrado");
+        }
 
-        scoring.setEdad(dto.getEdad());
-        scoring.setIngreso(dto.getIngreso());
-
-        int nuevoScore = calcularScore(dto.getEdad(), dto.getIngreso());
-        scoring.setScore(nuevoScore);
-
-        scoringRepository.save(scoring);
+        usuario.setNombre(nuevoNombre);
+        usuario.setEmail(nuevoEmail);
+        usuarioRepository.save(usuario);
     }
+
 
     private int calcularScore(int edad, double ingreso) {
         // Lógica de ejemplo (ajústala según tus reglas reales)

@@ -2,6 +2,7 @@ package com.scoring.scoring.controller;
 
 import com.scoring.scoring.DTO.AuthRequest;
 import com.scoring.scoring.DTO.AuthResponse;
+import com.scoring.scoring.DTO.PerfilDTO;
 import com.scoring.scoring.model.Usuario;
 import com.scoring.scoring.security.JwtUtil;
 import com.scoring.scoring.service.UsuarioService;
@@ -11,8 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -32,13 +35,47 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody Usuario usuario) {
         try {
             usuarioService.registrarUsuario(usuario);
-            // Retornamos un JSON simple con mensaje
-            return ResponseEntity.ok(Map.of("mensaje", "Usuario registrado con éxito"));
+            Map<String, String> respuesta = new HashMap<>();
+            respuesta.put("mensaje", "Usuario registrado con éxito");
+            return ResponseEntity.ok(respuesta);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/perfil")
+    public ResponseEntity<?> actualizarPerfil(@RequestBody PerfilDTO perfilDTO, Authentication auth) {
+        String emailActual = auth.getName();
+
+        try {
+            String nuevoEmail = usuarioService.editarPerfil(emailActual, perfilDTO.getNuevoEmail(), perfilDTO.getNombre());
+
+            // Generar nuevo token si el email fue actualizado
+            String nuevoToken = jwtUtil.generateToken(nuevoEmail);
+
+            return ResponseEntity.ok(Map.of(
+                    "mensaje", "Perfil actualizado correctamente",
+                    "token", nuevoToken,
+                    "nuevoEmail", nuevoEmail
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    @PutMapping("/editar-usuario")
+    public ResponseEntity<?> editarUsuario(@RequestBody Map<String, String> payload, Authentication auth) {
+        try {
+            String emailActual = auth.getName();
+            String nuevoNombre = payload.get("nombre");
+            String nuevoEmail = payload.get("email");
+
+            usuarioService.editarUsuario(emailActual, nuevoNombre, nuevoEmail);
+
+            return ResponseEntity.ok(Map.of("mensaje", "Usuario actualizado correctamente"));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
