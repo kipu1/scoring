@@ -1,6 +1,7 @@
 package com.scoring.scoring.DTO;
 
 public class AuthRequest {
+    private String nombre;
     private String email;
     private String password;
 
@@ -8,7 +9,10 @@ public class AuthRequest {
     public AuthRequest() {}
 
     // Constructor útil para pruebas o creación rápida
-    public AuthRequest(String email, String password) {
+
+
+    public AuthRequest(String nombre, String email, String password) {
+        this.nombre = nombre;
         this.email = email;
         this.password = password;
     }
@@ -28,5 +32,13 @@ public class AuthRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 }
