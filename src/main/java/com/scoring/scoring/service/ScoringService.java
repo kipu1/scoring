@@ -44,4 +44,28 @@ public class ScoringService {
         return scoringRepository.findByUsuario(usuario)
                 .orElseThrow(() -> new RuntimeException("No existe scoring para el usuario con email: " + email));
     }
+    public void editarDatos(String email, DatosPersonalesDTO dto) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Scoring scoring = scoringRepository.findByUsuario(usuario)
+                .orElseThrow(() -> new RuntimeException("Scoring no encontrado"));
+
+        scoring.setEdad(dto.getEdad());
+        scoring.setIngreso(dto.getIngreso());
+        scoring.setScore(calcularScore(dto.getEdad(), dto.getIngreso()));
+
+        scoringRepository.save(scoring);
+    }
+    public void eliminarDatos(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Scoring scoring = scoringRepository.findByUsuario(usuario)
+                .orElseThrow(() -> new RuntimeException("Scoring no encontrado"));
+
+        scoringRepository.delete(scoring);
+        // Opcional: borrar también foto si lo deseas
+    }
+
 }

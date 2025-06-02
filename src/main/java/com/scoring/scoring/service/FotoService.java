@@ -5,6 +5,7 @@ import com.scoring.scoring.model.Usuario;
 import com.scoring.scoring.repository.FotoRepository;
 import com.scoring.scoring.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,13 +16,26 @@ public class FotoService {
 
     public void guardarFoto(String email, byte[] data) {
         Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
 
-        Foto foto = new Foto();
-        foto.setUsuario(usuario);
-        foto.setData(data);
+        Foto existente = fotoRepository.findByUsuario(usuario);
 
-        fotoRepository.save(foto);
+        if (existente != null) {
+            existente.setData(data); // actualizar imagen
+            fotoRepository.save(existente);
+        } else {
+            Foto nuevaFoto = new Foto();
+            nuevaFoto.setData(data);
+            nuevaFoto.setUsuario(usuario);
+            fotoRepository.save(nuevaFoto);
+        }
+    }
+    public void eliminarFoto(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        usuario.setFoto(null);
+        usuarioRepository.save(usuario);
     }
 
 }

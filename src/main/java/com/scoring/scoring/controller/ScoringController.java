@@ -27,6 +27,18 @@ public class ScoringController {
 
     }
 
+    @PutMapping("/datos")
+    public ResponseEntity<?> editarDatos(@RequestBody DatosPersonalesDTO dto, Authentication auth) {
+        String email = auth.getName();
+        scoringService.editarDatos(email, dto);
+        return ResponseEntity.ok(Map.of("mensaje", "Datos actualizados correctamente"));
+    }
+    @DeleteMapping
+    public ResponseEntity<?> eliminarDatos(Authentication auth) {
+        String email = auth.getName();
+        scoringService.eliminarDatos(email);
+        return ResponseEntity.ok(Map.of("mensaje", "Datos eliminados correctamente"));
+    }
 
     @GetMapping
     public ResponseEntity<ScoringDTO> obtenerScoring(Authentication auth) {

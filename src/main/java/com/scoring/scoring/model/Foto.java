@@ -12,6 +12,7 @@ public class Foto {
     private byte[] data;
 
     @OneToOne
+    @JoinColumn(unique = true) // ✅ esto asegura la unicidad del usuario en la tabla foto
     private Usuario usuario;
 
     public Foto() {
