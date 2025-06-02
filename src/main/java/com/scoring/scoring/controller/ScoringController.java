@@ -33,6 +33,8 @@ public class ScoringController {
         scoringService.editarDatos(email, dto);
         return ResponseEntity.ok(Map.of("mensaje", "Datos actualizados correctamente"));
     }
+
+
     @DeleteMapping
     public ResponseEntity<?> eliminarDatos(Authentication auth) {
         String email = auth.getName();
